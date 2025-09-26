@@ -49,9 +49,9 @@ RUN npm ci --only=production
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 80
 
-ENV PORT 3000
+ENV PORT 80
 ENV HOSTNAME "0.0.0.0"
 
 # Create data directory for SQLite

@@ -339,12 +339,3 @@ curl -X PATCH "http://localhost:3000/api/reviews" \
 # Sync Hostaway reviews
 curl -X GET "http://localhost:3000/api/reviews/hostaway"
 ```
-
-## Webhooks (Future)
-
-Consider implementing webhooks for real-time updates:
-
-- `review.created` - New review added
-- `review.updated` - Review status changed
-- `review.approved` - Review approved for public display
-- `property.stats.updated` - Property statistics recalculated

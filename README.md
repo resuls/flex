@@ -15,7 +15,7 @@ A comprehensive review management system for property managers to analyze guest 
 
 - **Frontend**: Next.js 15, TypeScript, Tailwind CSS, Shadcn/ui
 - **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: SQLite (development) / PostgreSQL (production)
+- **Database**: SQLite
 - **State Management**: React Query, Zustand
 - **Charts**: Recharts
 - **Maps**: Google Maps API
@@ -76,121 +76,7 @@ A comprehensive review management system for property managers to analyze guest 
    - Homepage: http://localhost:3000
    - Manager Dashboard: http://localhost:3000/dashboard
 
-## Docker Deployment
-
-### Production Deployment on Linux
-
-1. **Create Dockerfile**
-   ```dockerfile
-   FROM node:18-alpine AS base
-   
-   # Install dependencies only when needed
-   FROM base AS deps
-   RUN apk add --no-cache libc6-compat
-   WORKDIR /app
-   
-   COPY package.json package-lock.json* ./
-   RUN npm ci --only=production
-   
-   # Rebuild the source code only when needed
-   FROM base AS builder
-   WORKDIR /app
-   COPY --from=deps /app/node_modules ./node_modules
-   COPY . .
-   
-   # Generate Prisma client
-   RUN npx prisma generate
-   
-   # Build application
-   RUN npm run build
-   
-   # Production image, copy all the files and run next
-   FROM base AS runner
-   WORKDIR /app
-   
-   ENV NODE_ENV production
-   
-   RUN addgroup --system --gid 1001 nodejs
-   RUN adduser --system --uid 1001 nextjs
-   
-   COPY --from=builder /app/public ./public
-   
-   # Set the correct permission for prerender cache
-   RUN mkdir .next
-   RUN chown nextjs:nodejs .next
-   
-   # Automatically leverage output traces to reduce image size
-   COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-   COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-   COPY --from=builder /app/prisma ./prisma
-   
-   USER nextjs
-   
-   EXPOSE 3000
-   
-   ENV PORT 3000
-   ENV HOSTNAME "0.0.0.0"
-   
-   CMD ["node", "server.js"]
-   ```
-
-2. **Create docker-compose.yml**
-   ```yaml
-   version: '3.8'
-   
-   services:
-     app:
-       build: .
-       ports:
-         - "3000:3000"
-       environment:
-         - DATABASE_URL=postgresql://reviews_user:reviews_password@db:5432/reviews_db
-         - HOSTAWAY_API_KEY=${HOSTAWAY_API_KEY}
-         - HOSTAWAY_ACCOUNT_ID=${HOSTAWAY_ACCOUNT_ID}
-         - HOSTAWAY_BASE_URL=https://api.hostaway.com/v1
-         - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-         - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
-         - NODE_ENV=production
-       depends_on:
-         - db
-       restart: unless-stopped
-   
-     db:
-       image: postgres:15-alpine
-       environment:
-         - POSTGRES_DB=reviews_db
-         - POSTGRES_USER=reviews_user
-         - POSTGRES_PASSWORD=reviews_password
-       volumes:
-         - postgres_data:/var/lib/postgresql/data
-       restart: unless-stopped
-   
-   volumes:
-     postgres_data:
-   ```
-
-3. **Create production environment file**
-   ```bash
-   # Create .env.production
-   HOSTAWAY_API_KEY=your_production_hostaway_api_key
-   HOSTAWAY_ACCOUNT_ID=your_account_id
-   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-   GOOGLE_PLACES_API_KEY=your_google_places_api_key
-   ```
-
-4. **Deploy with Docker Compose**
-   ```bash
-   # Build and start services
-   docker-compose --env-file .env.production up -d --build
-   
-   # Run database migrations
-   docker-compose exec app npx prisma db push
-   
-   # View logs
-   docker-compose logs -f app
-   ```
-
-### Alternative: Simple Docker Deployment
+### Docker Deployment
 
 ```bash
 # Build the image
@@ -311,16 +197,10 @@ npx prisma db push --force-reset
 npx prisma generate
 ```
 
-### Production (PostgreSQL)
+### Production
 ```bash
 # Run migrations
 npx prisma db push
-
-# Backup database
-pg_dump reviews_db > backup.sql
-
-# Restore database
-psql reviews_db < backup.sql
 ```
 
 ## Monitoring and Maintenance
