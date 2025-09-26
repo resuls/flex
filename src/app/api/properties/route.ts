@@ -48,13 +48,38 @@ export async function GET() {
 
     // Calculate final averages
     const properties = Array.from(propertyMap.values()).map(stats => {
-      const reviewsWithRating = reviews.filter(r => 
-        r.propertyId === stats.propertyId && r.rating !== null
-      );
+      const propertyReviews = reviews.filter(r => r.propertyId === stats.propertyId);
+      const googleReviews = propertyReviews.filter(r => r.source === 'google' && r.rating !== null);
+      const hostawayReviews = propertyReviews.filter(r => r.source === 'hostaway' && r.rating !== null);
       
-      stats.averageRating = reviewsWithRating.length > 0 
-        ? reviewsWithRating.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewsWithRating.length
+      // Calculate separate averages for each source
+      stats.googleAverageRating = googleReviews.length > 0 
+        ? googleReviews.reduce((sum, r) => {
+            const rating = r.rating || 0;
+            // Google ratings are typically 1-5, normalize to 5-star scale
+            const normalizedRating = rating > 5 ? rating / 2 : rating;
+            return sum + Math.min(normalizedRating, 5);
+          }, 0) / googleReviews.length
         : 0;
+
+      stats.hostawayAverageRating = hostawayReviews.length > 0 
+        ? hostawayReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / hostawayReviews.length
+        : 0;
+
+      // Keep overall average for backward compatibility (normalized to 5-star scale)
+      const allReviewsWithRating = propertyReviews.filter(r => r.rating !== null);
+      stats.averageRating = allReviewsWithRating.length > 0 
+        ? allReviewsWithRating.reduce((sum, r) => {
+            const rating = r.rating || 0;
+            // Normalize ratings to 5-star scale: Google (1-5) stays same, Hostaway (1-10) gets divided by 2
+            const normalizedRating = r.source === 'google' ? rating : rating / 2;
+            return sum + normalizedRating;
+          }, 0) / allReviewsWithRating.length
+        : 0;
+
+      // Add review counts for each source
+      stats.googleReviewCount = googleReviews.length;
+      stats.hostawayReviewCount = hostawayReviews.length;
 
       // Finalize category averages
       Object.keys(stats.categoryAverages).forEach(category => {

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://reviews_user:reviews_password@db:5432/reviews_db
+      - HOSTAWAY_API_KEY=${HOSTAWAY_API_KEY}
+      - HOSTAWAY_ACCOUNT_ID=${HOSTAWAY_ACCOUNT_ID}
+      - HOSTAWAY_BASE_URL=https://api.hostaway.com/v1
+      - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - NODE_ENV=production
+    depends_on:
+      - db
+    restart: unless-stopped
+    volumes:
+      - app_data:/app/data
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=reviews_db
+      - POSTGRES_USER=reviews_user
+      - POSTGRES_PASSWORD=reviews_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+  app_data:

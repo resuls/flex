@@ -147,110 +147,31 @@ const render = (status: Status) => {
 
 export default function PropertyMap({ propertyName, propertyId }: PropertyMapProps) {
   const coordinates = getPropertyCoordinates(propertyId);
-  const amenities = getNearbyAmenities(propertyId);
   const hasGoogleMapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && 
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY !== "AIzaSyBvOkBwJcTjqjqjqjqjqjqjqjqjqjqjqjqj";
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-blue-600" />
-          Location & Nearby Amenities
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Address */}
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <div className="flex items-start gap-3">
-            <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <p className="font-medium text-blue-900">{coordinates.address}</p>
-              <p className="text-sm text-blue-700 mt-1">
-                Perfect location with excellent transport links and nearby amenities
-              </p>
+    <div className="space-y-4">
+      {hasGoogleMapsKey ? (
+        <Wrapper apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} render={render}>
+          <MapComponent propertyName={propertyName} propertyId={propertyId} />
+        </Wrapper>
+      ) : (
+        <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-4xl mb-4">🗺️</div>
+            <h3 className="text-lg font-semibold mb-2">Map</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Google Maps integration would display the exact location.
+            </p>
+            <div className="text-xs text-gray-500 bg-yellow-50 p-3 rounded-lg">
+              <strong>Note:</strong> To enable Google Maps, add your API key to the environment variables.
+              <br />
+              Set <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> in your .env file.
             </div>
           </div>
         </div>
-
-        {/* Interactive Map */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-900">Interactive Map</h4>
-          {hasGoogleMapsKey ? (
-            <Wrapper apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} render={render}>
-              <MapComponent propertyName={propertyName} propertyId={propertyId} />
-            </Wrapper>
-          ) : (
-            <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-4xl mb-4">🗺️</div>
-                <h3 className="text-lg font-semibold mb-2">Interactive Map</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Google Maps integration would display the exact location, 
-                  nearby amenities, and transport links.
-                </p>
-                <div className="text-xs text-gray-500 bg-yellow-50 p-3 rounded-lg">
-                  <strong>Note:</strong> To enable Google Maps, add your API key to the environment variables.
-                  <br />
-                  Set <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> in your .env file.
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Nearby Amenities */}
-        {amenities.length > 0 && (
-          <div className="space-y-3">
-            <h4 className="font-medium text-gray-900">Nearby Amenities</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {amenities.map((amenity, index) => {
-                const IconComponent = amenity.icon;
-                return (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <IconComponent className="h-4 w-4 text-gray-600" />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{amenity.name}</p>
-                      <p className="text-xs text-gray-500">{amenity.distance}</p>
-                    </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {amenity.type}
-                    </Badge>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Transport Links */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-900">Transport Links</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
-              <Train className="h-4 w-4 text-green-600" />
-              <div>
-                <p className="font-medium text-sm">Underground</p>
-                <p className="text-xs text-gray-600">Multiple lines nearby</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-              <Bus className="h-4 w-4 text-blue-600" />
-              <div>
-                <p className="font-medium text-sm">Bus Routes</p>
-                <p className="text-xs text-gray-600">Frequent services</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg">
-              <Car className="h-4 w-4 text-purple-600" />
-              <div>
-                <p className="font-medium text-sm">Road Access</p>
-                <p className="text-xs text-gray-600">Easy parking</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

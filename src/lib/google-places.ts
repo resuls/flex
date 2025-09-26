@@ -59,10 +59,6 @@ const PROPERTY_ADDRESSES: Record<string, { name: string; address: string }> = {
   'studio-s3-12-kings-cross-central': {
     name: '12 Kings Cross Central',
     address: '12 Pancras Square, Kings Cross, London N1C 4AG, UK'
-  },
-  'wembley-stadium': {
-    name: 'Wembley Stadium',
-    address: 'Wembley Stadium, Wembley HA9 0WS, UK'
   }
 };
 
