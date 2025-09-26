@@ -47,7 +47,7 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/dev.db ./dev.db
+COPY --from=builder /app/prisma/dev.db ./prisma/dev.db
 COPY --from=builder /app/package-lock.json ./package-lock.json
 COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
 
