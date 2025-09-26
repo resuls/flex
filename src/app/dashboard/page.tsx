@@ -18,13 +18,28 @@ export default function Dashboard() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Fetch property stats
-  const { data: propertiesData, isLoading: propertiesLoading } = useQuery({
+  const { data: propertiesData, isLoading: propertiesLoading, error: propertiesError } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
-      const response = await fetch('/api/properties');
-      if (!response.ok) throw new Error('Failed to fetch properties');
-      return response.json();
+      try {
+        const response = await fetch('/api/properties', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch properties: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        throw error;
+      }
     },
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Sort properties
@@ -180,6 +195,10 @@ export default function Dashboard() {
           <CardContent>
             {propertiesLoading ? (
               <div className="text-center py-8">Loading properties...</div>
+            ) : propertiesError ? (
+              <div className="text-center py-8 text-red-600">
+                Error loading properties: {propertiesError.message}
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">

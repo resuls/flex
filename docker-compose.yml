@@ -11,6 +11,7 @@ services:
     restart: unless-stopped
     volumes:
       - app_data:/app/data
+      - ./prisma/dev.db:/app/prisma/dev.db
 
 volumes:
   app_data:
