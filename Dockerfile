@@ -47,11 +47,9 @@ COPY --from=builder /app/package-lock.json ./package-lock.json
 # Install production dependencies for Prisma
 RUN npm ci --only=production
 
-RUN npx prisma db push
-
 EXPOSE 80
 
 ENV PORT 80
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+ENTRYPOINT [ "entrypoint.sh" ]
