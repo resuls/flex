@@ -26,10 +26,10 @@ export default function HotelsPage() {
     },
   });
 
-  const allProperties: PropertyStats[] = propertiesData?.data || [];
-
   // Sort properties by selected category
   const properties = useMemo(() => {
+    const allProperties: PropertyStats[] = propertiesData?.data || [];
+    
     if (sortByCategory === 'overall') {
       return [...allProperties].sort((a, b) => b.averageRating - a.averageRating);
     }
@@ -39,7 +39,7 @@ export default function HotelsPage() {
       const bCategoryRating = b.categoryAverages[sortByCategory] || 0;
       return bCategoryRating - aCategoryRating;
     });
-  }, [allProperties, sortByCategory]);
+  }, [propertiesData?.data, sortByCategory]);
 
   // Calculate overall stats
   const totalProperties = properties.length;

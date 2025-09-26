@@ -63,7 +63,7 @@ const PROPERTY_ADDRESSES: Record<string, { name: string; address: string }> = {
 };
 
 // Cache for discovered Place IDs (will be populated dynamically)
-let DISCOVERED_PLACE_IDS: Record<string, string> = {};
+const DISCOVERED_PLACE_IDS: Record<string, string> = {};
 
 export class GooglePlacesAPI {
   private client = axios.create({

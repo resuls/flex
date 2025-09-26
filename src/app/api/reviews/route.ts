@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { API_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/lib/constants';
+import { API_CONSTANTS, ERROR_MESSAGES } from '@/lib/constants';
 
 // Types for API request/response
 interface ReviewsQueryParams {
@@ -41,7 +41,7 @@ const {
 
 const DEFAULT_PAGE = 1;
 
-export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<any>>> {
+export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<unknown>>> {
   try {
     const searchParams = request.nextUrl.searchParams;
     
@@ -70,9 +70,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
 
     if (search) {
       where.OR = [
-        { guestName: { contains: search, mode: 'insensitive' } },
-        { publicReview: { contains: search, mode: 'insensitive' } },
-        { propertyName: { contains: search, mode: 'insensitive' } },
+        { guestName: { contains: search } },
+        { publicReview: { contains: search } },
+        { propertyName: { contains: search } },
       ];
     }
 
@@ -191,7 +191,7 @@ interface UpdateReviewRequest {
   managerNotes?: string;
 }
 
-export async function PATCH(request: NextRequest): Promise<NextResponse<ApiResponse<any>>> {
+export async function PATCH(request: NextRequest): Promise<NextResponse<ApiResponse<unknown>>> {
   try {
     const body: UpdateReviewRequest = await request.json();
     const { id, isApprovedForPublic, managerNotes } = body;

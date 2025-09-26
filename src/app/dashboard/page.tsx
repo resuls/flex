@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, Building2, Users, TrendingUp, TrendingDown, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Star, Building2, Users, TrendingUp, Eye, ArrowUp, ArrowDown } from 'lucide-react';
 import { PropertyStats } from '@/lib/types';
 import Link from 'next/link';
 import { getMainPropertyImage } from '@/lib/property-images';
@@ -27,10 +27,9 @@ export default function Dashboard() {
     },
   });
 
-  const properties: PropertyStats[] = propertiesData?.data || [];
-
   // Sort properties
   const sortedProperties = useMemo(() => {
+    const properties: PropertyStats[] = propertiesData?.data || [];
     const sorted = [...properties].sort((a, b) => {
       let aValue, bValue;
       
@@ -72,13 +71,13 @@ export default function Dashboard() {
     });
 
     return sorted;
-  }, [properties, sortBy, sortOrder]);
+  }, [propertiesData?.data, sortBy, sortOrder]);
 
   // Calculate overall stats
-  const totalProperties = properties.length;
-  const totalReviews = properties.reduce((sum, p) => sum + p.totalReviews, 0);
-  const averageRating = properties.length > 0 
-    ? properties.reduce((sum, p) => sum + p.averageRating, 0) / properties.length
+  const totalProperties = sortedProperties.length;
+  const totalReviews = sortedProperties.reduce((sum, p) => sum + p.totalReviews, 0);
+  const averageRating = sortedProperties.length > 0 
+    ? sortedProperties.reduce((sum, p) => sum + p.averageRating, 0) / sortedProperties.length
     : 0;
 
   return (
@@ -135,8 +134,8 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {properties.length > 0 
-                  ? properties.reduce((max, p) => p.averageRating > max.averageRating ? p : max).propertyName.split(' ').slice(0, 2).join(' ')
+                {sortedProperties.length > 0 
+                  ? sortedProperties.reduce((max, p) => p.averageRating > max.averageRating ? p : max).propertyName.split(' ').slice(0, 2).join(' ')
                   : 'N/A'
                 }
               </div>

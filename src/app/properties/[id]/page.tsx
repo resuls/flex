@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -12,10 +11,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Star, TrendingUp, TrendingDown, Users, CheckCircle, Clock, AlertTriangle, ArrowLeft, Building2, Calendar as CalendarIcon } from 'lucide-react';
+import { Star, Users, CheckCircle, Building2, Calendar as CalendarIcon } from 'lucide-react';
 import { ReviewFilters, Review, PropertyStats } from '@/lib/types';
 import { toast } from 'sonner';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import Link from 'next/link';
 import { use } from 'react';
 
@@ -26,7 +25,6 @@ interface HotelDashboardProps {
 export default function HotelDashboard({ params }: HotelDashboardProps) {
   const { id } = use(params);
   const [filters, setFilters] = useState<ReviewFilters>({ propertyId: id });
-  const [selectedReviews, setSelectedReviews] = useState<Set<string>>(new Set());
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const queryClient = useQueryClient();
@@ -81,7 +79,7 @@ export default function HotelDashboard({ params }: HotelDashboardProps) {
   });
 
   // Fetch property stats
-  const { data: propertiesData, isLoading: propertiesLoading } = useQuery({
+  const { data: propertiesData } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
       const response = await fetch('/api/properties');
@@ -139,15 +137,6 @@ export default function HotelDashboard({ params }: HotelDashboardProps) {
     ? hostawayReviews.filter(r => r.rating).reduce((sum, r) => sum + (r.rating || 0), 0) / hostawayReviews.filter(r => r.rating).length
     : 0;
 
-  // Overall average (normalized to 5-star scale)
-  const averageRating = reviews.length > 0 
-    ? reviews.filter(r => r.rating).reduce((sum, r) => {
-        const rating = r.rating || 0;
-        // Normalize ratings to 5-star scale: Google (1-5) stays same, Hostaway (1-10) gets divided by 2
-        const normalizedRating = r.source === 'google' ? rating : rating / 2;
-        return sum + normalizedRating;
-      }, 0) / reviews.filter(r => r.rating).length
-    : 0;
 
   // Prepare chart data
   const ratingDistribution = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(rating => ({

@@ -11,7 +11,7 @@ export const queryClient = new QueryClient({
 
 export const queryKeys = {
   reviews: ['reviews'] as const,
-  reviewsWithFilters: (filters: Record<string, any>) => ['reviews', filters] as const,
+  reviewsWithFilters: (filters: Record<string, unknown>) => ['reviews', filters] as const,
   properties: ['properties'] as const,
   hostawayReviews: ['hostaway-reviews'] as const,
 };

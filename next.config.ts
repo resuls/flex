@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
   // Experimental features
   experimental: {
     // Enable server actions
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3000'],
+    },
   },
 };
 

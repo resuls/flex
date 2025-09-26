@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -42,19 +42,14 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
 
 # Install production dependencies for Prisma
 RUN npm ci --only=production
-
-USER nextjs
 
 EXPOSE 80
 
 ENV PORT 80
 ENV HOSTNAME "0.0.0.0"
-
-# Create data directory for SQLite
-RUN mkdir -p /app/data
 
 CMD ["node", "server.js"]

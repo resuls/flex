@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { googlePlacesAPI, mockGoogleReviews } from '@/lib/google-places';
+import { googlePlacesAPI, mockGoogleReviews, GoogleReview } from '@/lib/google-places';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
@@ -96,7 +96,7 @@ async function fetchPropertyGoogleReviews(propertyId: string, useMockData: boole
 }
 
 async function fetchAndSaveGoogleReviews(propertyId: string, propertyName: string, useMockData: boolean) {
-  let googleReviews;
+  let googleReviews: GoogleReview[];
 
   if (useMockData) {
     console.log('Using mock Google reviews data');
@@ -205,7 +205,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch reviews for this specific place
-    const googleReviews = await googlePlacesAPI.getPropertyReviews(propertyId);
     const reviews = await fetchAndSaveGoogleReviews(propertyId, propertyName, false);
 
     return NextResponse.json({

@@ -24,6 +24,10 @@ export async function GET() {
           averageRating: 0,
           approvedReviews: 0,
           pendingReviews: 0,
+          googleAverageRating: 0,
+          hostawayAverageRating: 0,
+          googleReviewCount: 0,
+          hostawayReviewCount: 0,
           categoryAverages: {},
         });
       }

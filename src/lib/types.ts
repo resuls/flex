@@ -164,7 +164,7 @@ export interface PropertyStats {
 /**
  * Generic API response wrapper
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   /** Whether the request was successful */
   success: boolean;
   /** Response data (if successful) */

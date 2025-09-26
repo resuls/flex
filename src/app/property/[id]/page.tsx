@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Wifi, Car, Coffee, Tv, Users, Calendar } from 'lucide-react';
+import { Star, MapPin, Wifi, Car, Coffee, Tv, Users } from 'lucide-react';
 import { Review } from '@/lib/types';
 import { use } from 'react';
 import PropertyMap from '@/components/PropertyMap';
@@ -20,7 +20,7 @@ export default function PropertyPage({ params }: PropertyPageProps) {
   const { id } = use(params);
 
   // Fetch approved reviews for this property
-  const { data: reviewsData, isLoading } = useQuery({
+  const { data: reviewsData } = useQuery({
     queryKey: ['property-reviews', id],
     queryFn: async () => {
       const response = await fetch(`/api/reviews?propertyId=${id}`);
@@ -52,31 +52,8 @@ export default function PropertyPage({ params }: PropertyPageProps) {
     ? hostawayReviews.filter(r => r.rating).reduce((sum, r) => sum + (r.rating || 0), 0) / hostawayReviews.filter(r => r.rating).length
     : 0;
 
-  // Calculate overall average - normalize to 5-star scale
-  const averageRating = approvedReviews.length > 0 
-    ? approvedReviews.filter(r => r.rating).reduce((sum, r) => {
-        const rating = r.rating || 0;
-        // Normalize ratings to 5-star scale: Google (1-5) stays same, Hostaway (1-10) gets divided by 2
-        const normalizedRating = r.source === 'google' ? rating : rating / 2;
-        return sum + normalizedRating;
-      }, 0) / approvedReviews.filter(r => r.rating).length
-    : 0;
 
-  const categoryStats = approvedReviews.reduce((acc, review) => {
-    review.categories.forEach(cat => {
-      if (!acc[cat.category]) {
-        acc[cat.category] = { total: 0, count: 0 };
-      }
-      acc[cat.category].total += cat.rating;
-      acc[cat.category].count += 1;
-    });
-    return acc;
-  }, {} as Record<string, { total: number; count: number }>);
 
-  const categoryAverages = Object.entries(categoryStats).map(([category, stats]) => ({
-    category,
-    average: stats.count > 0 ? stats.total / stats.count : 0,
-  }));
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FFFDF6' }}>
@@ -118,7 +95,7 @@ export default function PropertyPage({ params }: PropertyPageProps) {
                   <p className="text-gray-700 text-lg leading-relaxed mb-4">
                     Experience modern living in the heart of London with this beautifully designed apartment. 
                     Perfect for business travelers and leisure guests alike, this property offers contemporary 
-                    amenities and excellent connectivity to London's key attractions and business districts.
+                    amenities and excellent connectivity to London&apos;s key attractions and business districts.
                   </p>
                   <p className="text-gray-700 text-lg leading-relaxed mb-4">
                     Located in a prime area, this stylish accommodation features high-quality furnishings, 
@@ -505,7 +482,7 @@ export default function PropertyPage({ params }: PropertyPageProps) {
                     </Button>
                     
                     <p className="text-center text-sm text-gray-600">
-                      You won't be charged yet
+                      You won&apos;t be charged yet
                     </p>
                   </div>
                 </CardContent>

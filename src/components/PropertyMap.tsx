@@ -1,14 +1,22 @@
 'use client';
 
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Navigation, Train, Bus, Car, Coffee, ShoppingBag, Utensils } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface PropertyMapProps {
   propertyName: string;
   propertyId: string;
+}
+
+// Google Maps types
+interface GoogleMap {
+  setCenter: (center: { lat: number; lng: number }) => void;
+  setZoom: (zoom: number) => void;
+}
+
+interface GoogleMarker {
+  setPosition: (position: { lat: number; lng: number }) => void;
+  setMap: (map: GoogleMap | null) => void;
 }
 
 // Property coordinates based on property names (mock data for demo)
@@ -38,45 +46,17 @@ const getPropertyCoordinates = (propertyName: string) => {
   };
 };
 
-// Nearby amenities data
-const getNearbyAmenities = (propertyName: string) => {
-  const amenities: Record<string, Array<{ name: string; type: string; distance: string; icon: any }>> = {
-    '2b-n1-a---29-shoreditch-heights': [
-      { name: 'Shoreditch High Street Station', type: 'transport', distance: '2 min walk', icon: Train },
-      { name: 'Old Street Station', type: 'transport', distance: '8 min walk', icon: Train },
-      { name: 'Brick Lane', type: 'attraction', distance: '5 min walk', icon: MapPin },
-      { name: 'Spitalfields Market', type: 'shopping', distance: '10 min walk', icon: ShoppingBag },
-      { name: 'Boxpark Shoreditch', type: 'food', distance: '3 min walk', icon: Utensils }
-    ],
-    '1b-e2-b---45-canary-wharf-tower': [
-      { name: 'Canary Wharf Station', type: 'transport', distance: '1 min walk', icon: Train },
-      { name: 'Canary Wharf DLR', type: 'transport', distance: '2 min walk', icon: Train },
-      { name: 'Canary Wharf Shopping Centre', type: 'shopping', distance: '3 min walk', icon: ShoppingBag },
-      { name: 'Greenwich Park', type: 'attraction', distance: '15 min walk', icon: MapPin },
-      { name: 'Billingsgate Market', type: 'food', distance: '8 min walk', icon: Utensils }
-    ],
-    'studio-s3---12-kings-cross-central': [
-      { name: 'Kings Cross Station', type: 'transport', distance: '3 min walk', icon: Train },
-      { name: 'St Pancras Station', type: 'transport', distance: '5 min walk', icon: Train },
-      { name: 'British Library', type: 'attraction', distance: '2 min walk', icon: MapPin },
-      { name: 'Coal Drops Yard', type: 'shopping', distance: '8 min walk', icon: ShoppingBag },
-      { name: 'Granary Square', type: 'attraction', distance: '5 min walk', icon: MapPin }
-    ]
-  };
-  
-  return amenities[propertyName] || [];
-};
 
 const MapComponent = ({ propertyName, propertyId }: PropertyMapProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<google.maps.Map>();
-  const [marker, setMarker] = useState<google.maps.Marker>();
+  const [map, setMap] = useState<GoogleMap>();
+  const [marker, setMarker] = useState<GoogleMarker>();
   const coordinates = getPropertyCoordinates(propertyId);
-  const amenities = getNearbyAmenities(propertyId);
 
   useEffect(() => {
     if (ref.current && !map) {
-      const mapInstance = new google.maps.Map(ref.current, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mapInstance = new (window as any).google.maps.Map(ref.current, {
         center: { lat: coordinates.lat, lng: coordinates.lng },
         zoom: 15,
         mapTypeControl: true,
@@ -97,7 +77,8 @@ const MapComponent = ({ propertyName, propertyId }: PropertyMapProps) => {
 
   useEffect(() => {
     if (map && !marker) {
-      const markerInstance = new google.maps.Marker({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const markerInstance = new (window as any).google.maps.Marker({
         position: { lat: coordinates.lat, lng: coordinates.lng },
         map: map,
         title: propertyName,
@@ -108,8 +89,10 @@ const MapComponent = ({ propertyName, propertyId }: PropertyMapProps) => {
               <path d="M20 8 L26 20 L20 32 L14 20 Z" fill="#ffffff"/>
             </svg>
           `),
-          scaledSize: new google.maps.Size(40, 40),
-          anchor: new google.maps.Point(20, 20)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          scaledSize: new (window as any).google.maps.Size(40, 40),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          anchor: new (window as any).google.maps.Point(20, 20)
         }
       });
       setMarker(markerInstance);
@@ -142,13 +125,18 @@ const render = (status: Status) => {
     );
   }
 
-  return null;
+  return (
+    <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+      <div className="text-center text-gray-600">
+        <div className="text-4xl mb-2">🗺️</div>
+        <p>Loading map...</p>
+      </div>
+    </div>
+  );
 };
 
 export default function PropertyMap({ propertyName, propertyId }: PropertyMapProps) {
-  const coordinates = getPropertyCoordinates(propertyId);
-  const hasGoogleMapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && 
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY !== "AIzaSyBvOkBwJcTjqjqjqjqjqjqjqjqjqjqjqjqj";
+  const hasGoogleMapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   return (
     <div className="space-y-4">

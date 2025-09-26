@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, Building2, Star, Users, TrendingUp, MapPin, CheckCircle, Eye, ArrowRight } from "lucide-react";
+import { BarChart3, Building2, Star, Users, TrendingUp, MapPin, Eye, ArrowRight } from "lucide-react";
 import { getMainPropertyImage } from "@/lib/property-images";
 import Image from "next/image";
 
