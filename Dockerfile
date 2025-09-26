@@ -15,6 +15,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Accept build arguments for environment variables
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+# Set environment variables for build time
+ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+
 # Generate Prisma client
 RUN npx prisma generate
 
