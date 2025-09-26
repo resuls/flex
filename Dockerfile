@@ -53,4 +53,4 @@ EXPOSE 80
 ENV PORT 80
 ENV HOSTNAME "0.0.0.0"
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "./entrypoint.sh" ]
