@@ -123,8 +123,8 @@ export interface ReviewFilters {
   rating?: [number, number];
   /** Review source filter */
   source?: string;
-  /** Review status filter */
-  status?: string;
+  /** Review category filter */
+  category?: string;
   /** Date range filter */
   dateRange?: [Date, Date];
   /** Property ID filter */

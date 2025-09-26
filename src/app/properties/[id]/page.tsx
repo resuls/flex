@@ -67,7 +67,7 @@ export default function HotelDashboard({ params }: HotelDashboardProps) {
       const params = new URLSearchParams();
       if (filters.search) params.append('search', filters.search);
       if (filters.source) params.append('source', filters.source);
-      if (filters.status) params.append('status', filters.status);
+      if (filters.category) params.append('category', filters.category);
       if (filters.propertyId) params.append('propertyId', filters.propertyId);
       if (filters.rating?.[0]) params.append('minRating', filters.rating[0].toString());
       if (filters.rating?.[1]) params.append('maxRating', filters.rating[1].toString());
@@ -291,18 +291,19 @@ export default function HotelDashboard({ params }: HotelDashboardProps) {
                   </div>
                   
                   <div>
-                    <Label htmlFor="status" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Status
+                    <Label htmlFor="category" className="text-sm font-medium text-gray-700 mb-2 block">
+                      Category
                     </Label>
-                    <Select value={filters.status || 'all'} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? undefined : value }))}>
+                    <Select value={filters.category || 'all'} onValueChange={(value) => setFilters(prev => ({ ...prev, category: value === 'all' ? undefined : value }))}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All statuses" />
+                        <SelectValue placeholder="All categories" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All statuses</SelectItem>
-                        <SelectItem value="published">Published</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="all">All categories</SelectItem>
+                        <SelectItem value="cleanliness">Cleanliness</SelectItem>
+                        <SelectItem value="communication">Communication</SelectItem>
+                        <SelectItem value="location">Location</SelectItem>
+                        <SelectItem value="value">Value</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -412,7 +413,12 @@ export default function HotelDashboard({ params }: HotelDashboardProps) {
                               {review.rating && (
                                 <div className="flex items-center gap-1">
                                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="font-medium">{review.rating}/10</span>
+                                  <span className="font-medium">
+                                    {review.source === 'google' 
+                                      ? `${(review.rating || 0) / 2}/5` 
+                                      : `${review.rating}/10`
+                                    }
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -422,7 +428,7 @@ export default function HotelDashboard({ params }: HotelDashboardProps) {
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {review.categories.map((cat) => (
                                   <Badge key={cat.id} variant="outline">
-                                    {cat.category}: {cat.rating}/10
+                                    {cat.category}: {review.source === 'google' ? `${cat.rating / 2}/5` : `${cat.rating}/10`}
                                   </Badge>
                                 ))}
                               </div>

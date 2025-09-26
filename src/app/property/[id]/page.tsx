@@ -333,7 +333,7 @@ export default function PropertyPage({ params }: PropertyPageProps) {
                                       <div className="flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => {
                                           // Normalize Google rating to 5-star scale
-                                          const normalizedRating = review.rating > 5 ? review.rating / 2 : review.rating;
+                                          const normalizedRating = (review.rating && review.rating > 5) ? review.rating / 2 : (review.rating || 0);
                                           const cappedRating = Math.min(normalizedRating, 5);
                                           return (
                                             <Star 
@@ -414,14 +414,17 @@ export default function PropertyPage({ params }: PropertyPageProps) {
                                           <Star 
                                             key={i} 
                                             className={`h-3 w-3 ${
-                                              i < review.rating
+                                              i < (review.rating || 0)
                                                 ? 'fill-yellow-400 text-yellow-400' 
                                                 : 'text-gray-300'
                                             }`} 
                                           />
                                         ))}
                                         <span className="ml-2 text-sm text-gray-600 font-medium">
-                                          {review.rating}/10
+                                          {review.source === 'google' 
+                                            ? `${((review.rating || 0) / 2).toFixed(1)}/5` 
+                                            : `${review.rating || 0}/10`
+                                          }
                                         </span>
                                       </div>
                                     )}
@@ -437,7 +440,7 @@ export default function PropertyPage({ params }: PropertyPageProps) {
                                     <div className="flex flex-wrap gap-2 mt-4">
                                       {review.categories.map((cat) => (
                                         <Badge key={cat.id} variant="secondary" className="text-sm">
-                                          {cat.category}: {cat.rating}/10
+                                          {cat.category}: {review.source === 'google' ? `${(cat.rating / 2).toFixed(1)}/5` : `${cat.rating}/10`}
                                         </Badge>
                                       ))}
                                     </div>

@@ -7,7 +7,7 @@ import { API_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/lib/constants
 interface ReviewsQueryParams {
   search?: string;
   source?: string;
-  status?: string;
+  category?: string;
   propertyId?: string;
   minRating?: string;
   maxRating?: string;
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const {
       search,
       source,
-      status,
+      category,
       propertyId,
       minRating,
       maxRating,
@@ -80,8 +80,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       where.source = source;
     }
 
-    if (status) {
-      where.status = status;
+    if (category) {
+      where.categories = {
+        some: {
+          category: category
+        }
+      };
     }
 
     if (propertyId) {
@@ -119,18 +123,44 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       [sortBy]: sortOrder,
     };
 
-    const [reviews, total] = await Promise.all([
-      prisma.review.findMany({
+    // If category filtering is applied, we need custom sorting logic
+    let reviews, total;
+    
+    if (category) {
+      // Get all reviews first, then sort by category rating in descending order
+      const allReviews = await prisma.review.findMany({
         where,
         include: {
           categories: true,
         },
-        orderBy,
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.review.count({ where }),
-    ]);
+      });
+
+      // Sort by category rating in descending order
+      const sortedReviews = allReviews.sort((a, b) => {
+        const aCategoryRating = a.categories.find(c => c.category === category)?.rating || 0;
+        const bCategoryRating = b.categories.find(c => c.category === category)?.rating || 0;
+        return bCategoryRating - aCategoryRating; // Descending order
+      });
+
+      // Apply pagination
+      const startIndex = (page - 1) * limit;
+      reviews = sortedReviews.slice(startIndex, startIndex + limit);
+      total = allReviews.length;
+    } else {
+      // Standard sorting for non-category queries
+      [reviews, total] = await Promise.all([
+        prisma.review.findMany({
+          where,
+          include: {
+            categories: true,
+          },
+          orderBy,
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        prisma.review.count({ where }),
+      ]);
+    }
 
     return NextResponse.json({
       success: true,

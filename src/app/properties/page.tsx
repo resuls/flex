@@ -4,13 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Building2, Users, TrendingUp, TrendingDown, Eye } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Star, Building2, Users, TrendingUp, TrendingDown, Eye, Filter } from 'lucide-react';
 import { PropertyStats } from '@/lib/types';
 import Link from 'next/link';
 import { getMainPropertyImage } from '@/lib/property-images';
 import Image from 'next/image';
+import { useState, useMemo } from 'react';
 
 export default function HotelsPage() {
+  // Category sorting state
+  const [sortByCategory, setSortByCategory] = useState<string>('overall');
+
   // Fetch property stats
   const { data: propertiesData, isLoading: propertiesLoading } = useQuery({
     queryKey: ['properties'],
@@ -21,7 +26,20 @@ export default function HotelsPage() {
     },
   });
 
-  const properties: PropertyStats[] = propertiesData?.data || [];
+  const allProperties: PropertyStats[] = propertiesData?.data || [];
+
+  // Sort properties by selected category
+  const properties = useMemo(() => {
+    if (sortByCategory === 'overall') {
+      return [...allProperties].sort((a, b) => b.averageRating - a.averageRating);
+    }
+    
+    return [...allProperties].sort((a, b) => {
+      const aCategoryRating = a.categoryAverages[sortByCategory] || 0;
+      const bCategoryRating = b.categoryAverages[sortByCategory] || 0;
+      return bCategoryRating - aCategoryRating;
+    });
+  }, [allProperties, sortByCategory]);
 
   // Calculate overall stats
   const totalProperties = properties.length;
@@ -104,7 +122,24 @@ export default function HotelsPage() {
         {/* Properties Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Properties Overview</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>Properties Overview</CardTitle>
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-gray-500" />
+                <Select value={sortByCategory} onValueChange={setSortByCategory}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Sort by category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="overall">Overall Rating</SelectItem>
+                    <SelectItem value="cleanliness">Cleanliness</SelectItem>
+                    <SelectItem value="communication">Communication</SelectItem>
+                    <SelectItem value="location">Location</SelectItem>
+                    <SelectItem value="value">Value</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {propertiesLoading ? (
@@ -116,7 +151,10 @@ export default function HotelsPage() {
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-semibold text-gray-900">Hotel</th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-900">Image</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-900">Rating</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-900">Overall Rating</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-900">
+                        {sortByCategory === 'overall' ? 'Overall' : sortByCategory.charAt(0).toUpperCase() + sortByCategory.slice(1)} Rating
+                      </th>
                       <th className="text-center py-3 px-4 font-semibold text-gray-900">Reviews</th>
                       <th className="text-center py-3 px-4 font-semibold text-gray-900">Approved</th>
                       <th className="text-center py-3 px-4 font-semibold text-gray-900">Pending</th>
@@ -160,6 +198,17 @@ export default function HotelsPage() {
                             <div className="flex items-center justify-center gap-1">
                               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                               <span className="font-semibold">{property.averageRating.toFixed(1)}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <Star className="h-4 w-4 fill-blue-400 text-blue-400" />
+                              <span className="font-semibold">
+                                {sortByCategory === 'overall' 
+                                  ? property.averageRating.toFixed(1)
+                                  : (property.categoryAverages[sortByCategory] || 0).toFixed(1)
+                                }
+                              </span>
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center">
